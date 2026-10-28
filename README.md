@@ -163,6 +163,14 @@ Three more keys are optional:
 
 `skipCalendars` is only the starting position: it decides which calendars come unticked the first time you open the picker, and after that the picker is the answer. `skipTitles` drops appointments by name, which is useful for a standing block that would otherwise take a row every day. `borrowedCalendar` adds a toggle at the bottom that swaps your own day for a colleague's, for when you are looking for a slot in their week. Leave it out and the toggle is not drawn at all.
 
+The grid shows 7:00 to 23:00 unless something falls outside it. To rest on your working day instead:
+
+```json
+{ "dayStartHour": 8, "dayEndHour": 17 }
+```
+
+An earlier or later appointment still stretches the grid to fit, so nothing outside those hours drops off the screen.
+
 Changes are picked up on the next refresh, within a minute. No restart needed.
 
 ## Light themes

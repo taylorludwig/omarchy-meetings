@@ -53,6 +53,9 @@ Panel {
   property var weekCache: []
   property var upcoming: null
   property int nowMinutes: 0
+  // The resting span of the grid, from dayStartHour and dayEndHour in the config.
+  property int restStartMinutes: 7 * 60
+  property int restEndMinutes: 23 * 60
   property bool reachable: true
 
   // Which day the panel is showing. 0 is today; the bar stays about today even
@@ -229,13 +232,13 @@ Panel {
   // when something falls outside it, so an early or late appointment does not
   // quietly drop off the screen.
   readonly property int dayStart: {
-    var earliest = 7 * 60
+    var earliest = restStartMinutes
     for (var i = 0; i < allTimed.length; i++) earliest = Math.min(earliest, allTimed[i].start_minutes - 30)
     return Math.max(0, Math.min(earliest, nowMinutes - 60))
   }
 
   readonly property int dayEnd: {
-    var latest = 23 * 60
+    var latest = restEndMinutes
     for (var i = 0; i < allTimed.length; i++) latest = Math.max(latest, allTimed[i].end_minutes + 30)
     return Math.min(24 * 60, Math.max(latest, nowMinutes + 60))
   }
@@ -473,6 +476,10 @@ Panel {
       }
 
       nowMinutes = data.now_minutes || 0
+      if (data.day_hours) {
+        restStartMinutes = data.day_hours.start * 60
+        restEndMinutes = data.day_hours.end * 60
+      }
       datePath = data.date_path || ""
       dateLabel = data.date_label || ""
       calendarProvider = data.provider || "google"

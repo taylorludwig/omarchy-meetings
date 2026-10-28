@@ -297,6 +297,22 @@ if "--only" in ARGV:
 
 SKIP_TITLES = CONFIG.get("skipTitles") or []
 
+# The hours the grid shows when nothing falls outside them. An appointment
+# earlier or later still stretches the grid, so this only sets the resting size.
+#
+#   { "dayStartHour": 8, "dayEndHour": 17 }
+def _config_hour(key, default):
+    value = CONFIG.get(key)
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return default
+    return min(24, max(0, int(value)))
+
+
+DAY_START_HOUR = _config_hour("dayStartHour", 7)
+DAY_END_HOUR = _config_hour("dayEndHour", 23)
+if DAY_END_HOUR <= DAY_START_HOUR:
+    DAY_START_HOUR, DAY_END_HOUR = 7, 23
+
 # Colour and order per calendar. Priority decides which appointment the bar
 # picks when two run at once: the lower number wins.
 #
@@ -1611,6 +1627,7 @@ def main():
         "compact": COMPACT,
         "now": now.strftime("%H:%M"),
         "now_minutes": now.hour * 60 + now.minute,
+        "day_hours": {"start": DAY_START_HOUR, "end": DAY_END_HOUR},
         "upcoming": upcoming,
         "days": built,
     }
