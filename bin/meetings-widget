@@ -755,6 +755,25 @@ def ical_conference_uri(lines, location, description):
     return ""
 
 
+# A video-call link written into a Google event's location or description by
+# hand, or by an invite that came from Zoom or Teams itself, never reaches
+# Google's conference fields. Only known meeting hosts count here, so a doc or
+# a ticket linked in the description doesn't turn into a join button.
+MEETING_URL = re.compile(
+    r"https://(?:[A-Za-z0-9-]+\.)*(?:zoom\.us/(?:j|my|w|s)/|meet\.google\.com/"
+    r"|teams\.microsoft\.com/l/meetup-join/|teams\.live\.com/meet/"
+    r"|[A-Za-z0-9-]+\.webex\.com/)[A-Za-z0-9._~:/?#@!$&'()*+,;=%-]*")
+
+
+def text_meeting_uri(location, description):
+    # Location first, as for iCalendar: there the link is the meeting itself.
+    for text in (location, description):
+        match = MEETING_URL.search(str(text or ""))
+        if match:
+            return match.group(0)
+    return ""
+
+
 WEEKDAYS = {"MO": 0, "TU": 1, "WE": 2, "TH": 3,
             "FR": 4, "SA": 5, "SU": 6}
 
@@ -1134,7 +1153,8 @@ def event_from(row, day):
     # The conference uri is the meeting link when there is no separate hangout
     # field: the older Hangouts link and the newer Meet conference sit in
     # different columns.
-    hangout = str(row.get("hangout_link") or "") or str(row.get("conference_uri") or "")
+    hangout = (str(row.get("hangout_link") or "") or str(row.get("conference_uri") or "")
+               or text_meeting_uri(row.get("location"), row.get("description")))
 
     # What the detail card shows. Empty stays empty: a heading with nothing
     # under it is worse than no heading.
