@@ -280,7 +280,7 @@ Panel {
   readonly property string clockText: {
     var h = Math.floor(nowMinutes / 60)
     var m = nowMinutes % 60
-    return (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m
+    return (h % 12 || 12) + ":" + (m < 10 ? "0" : "") + m + (h < 12 ? " AM" : " PM")
   }
   readonly property int alldayRows: {
     var most = 0
@@ -1523,7 +1523,7 @@ Panel {
                 // Gives way to the clock: two times on top of each other read
                 // as neither.
                 visible: Math.abs(root.nowMinutes - hour * 60) * root.hourHeight / 60 > Style.space(9)
-                text: String(hour).padStart(2, "0") + ":00"
+                text: (hour % 12 || 12) + (hour % 24 < 12 ? " AM" : " PM")
                 font.family: root.fontFamily
                 font.pixelSize: Style.font.caption
                 color: root.foreground
